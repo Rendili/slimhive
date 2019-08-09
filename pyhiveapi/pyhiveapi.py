@@ -477,7 +477,7 @@ class Pyhiveapi:
                 if len(tmp_devices_trv) > 0:
                     HSC.devices.trv = tmp_devices_trv
                     for node in HSC.devices.trv:
-                        HSC.devices.id_list.update({node["id"]: HSC.devices.trv})    
+                        HSC.devices.id_list.update({node["id"]: HSC.devices.trv})
                 if len(tmp_devices_boiler_module) > 0:
                     HSC.devices.boiler_module = tmp_devices_boiler_module
                     for node in HSC.devices.boiler_module:
@@ -494,6 +494,7 @@ class Pyhiveapi:
                     HSC.devices.sensors = tmp_devices_sensors
                     for node in HSC.devices.sensors:
                         HSC.devices.id_list.update({node["id"]: HSC.devices.sensors})
+
                 if len(tmp_products_heating) > 0:
                     HSC.products.heating = tmp_products_heating
                     for node in HSC.products.heating:
@@ -802,6 +803,7 @@ class Pyhiveapi:
                     node_name = product["state"]["name"]
                     device_list_climate.append({'HA_DeviceType': 'TRV', 'Hive_NodeID': product["id"], 'Hive_NodeName': node_name, "Hive_DeviceType": "TRV"})
                     """device_list_sensor.append({'HA_DeviceType': 'TRV_CurrentTemperature', 'Hive_NodeID': product["id"], 'Hive_NodeName': node_name, "Hive_DeviceType": "TRV"})"""
+                    
                     """device_list_sensor.append({'HA_DeviceType': 'Heating_TargetTemperature', 'Hive_NodeID': product["id"], 'Hive_NodeName': node_name, "Hive_DeviceType": "Heating"})
                     device_list_sensor.append({'HA_DeviceType': 'Heating_State', 'Hive_NodeID': product["id"], 'Hive_NodeName': node_name, "Hive_DeviceType": "Heating"})
                     device_list_sensor.append({'HA_DeviceType': 'Heating_Mode', 'Hive_NodeID': product["id"], 'Hive_NodeName': node_name, "Hive_DeviceType": "Heating"})
@@ -1093,7 +1095,6 @@ class Pyhiveapi:
                             current_temp_tmp = (HSC.products.heating[node_index]
                                                 ["props"]["temperature"])
                             current_temp_found = True
-            
             if len(HSC.products.trv) > 0 and current_temp_found == False:
                 for current_node_index in range(0, len(HSC.products.trv)):
                     if "id" in HSC.products.trv[current_node_index]:
@@ -1106,7 +1107,6 @@ class Pyhiveapi:
                             current_temp_tmp = (HSC.products.trv[node_index]
                                                 ["props"]["temperature"])
                             current_temp_found = True
-
             if current_temp_found:
                 NODE_ATTRIBS[current_node_attribute] = current_temp_tmp
                 current_temp_return = current_temp_tmp
@@ -1146,6 +1146,51 @@ class Pyhiveapi:
                 current_temp_return = 0
 
             return round(float(current_temp_return),1)
+
+        def operational_status(self, node_id,device_type):
+            node_index = -1
+
+            current_op_return = ""
+            current_op_tmp = ""
+            current_op_found = False
+
+            current_node_attribute = "Heating_OperationalStatus_" + node_id
+            if device_type == "Heating":
+                if len(HSC.products.heating) > 0:
+                    for current_node_index in range(0, len(HSC.products.heating)):
+                        if "id" in HSC.products.heating[current_node_index]:
+                            if HSC.products.heating[current_node_index]["id"] == node_id:
+                                node_index = current_node_index
+                                break
+                    if node_index != -1:
+                        if "props" in HSC.products.heating[node_index]:
+                            if "working" in HSC.products.heating[node_index]["props"]:
+                                current_op_tmp = (HSC.products.heating[node_index]
+                                                    ["props"]["working"])
+                                current_op_found = True
+            if device_type == "TRV":
+                if len(HSC.products.trv) > 0:
+                    for current_node_index in range(0, len(HSC.products.trv)):
+                        if "id" in HSC.products.trv[current_node_index]:
+                            if HSC.products.trv[current_node_index]["id"] == node_id:
+                                node_index = current_node_index
+                                break
+                    if node_index != -1:
+                        if "props" in HSC.products.trv[node_index]:
+                            if "working" in HSC.products.trv[node_index]["props"]:
+                                current_op_tmp = (HSC.products.trv[node_index]
+                                                    ["props"]["working"])
+                                current_op_found = True                
+            if current_op_found:
+                NODE_ATTRIBS[current_node_attribute] = current_op_tmp
+                current_op_return = current_op_tmp
+            else:
+                if current_node_attribute in NODE_ATTRIBS:
+                    current_op_return = NODE_ATTRIBS.get(current_node_attribute)
+                else:
+                    current_op_return = "UNKNOWN"
+            
+            return current_op_return
 
         def minmax_temperatures(self, node_id):
             """Min/Max Temp"""
@@ -1208,7 +1253,6 @@ class Pyhiveapi:
                     if "state" in HSC.products.trv[node_index] and "target" in HSC.products.trv[node_index]["state"]:
                         heating_target_temp_tmp = HSC.products.trv[node_index]["state"]["target"]
                         heating_target_temp_found = True
-
             if heating_target_temp_found:
                 NODE_ATTRIBS[current_node_attribute] = heating_target_temp_tmp
                 heating_target_temp_return = heating_target_temp_tmp
@@ -1264,7 +1308,6 @@ class Pyhiveapi:
                             "mode" in HSC.products.trv[node_index]["state"]):
                         mode_tmp = HSC.products.trv[node_index]["state"]["mode"]
                         mode_found = True
-
             if mode_found:
                 NODE_ATTRIBS[current_node_attribute] = mode_tmp
                 mode_return = mode_tmp
@@ -1357,7 +1400,6 @@ class Pyhiveapi:
                         else:
                             heating_boost_tmp = "ON"
                         heating_boost_found = True
-
             if heating_boost_found:
                 NODE_ATTRIBS[current_node_attribute] = heating_boost_tmp
                 heating_boost_return = heating_boost_tmp
@@ -1455,8 +1497,7 @@ class Pyhiveapi:
                             if str(api_resp) == "<Response [200]>":
                                 Pyhiveapi.hive_api_get_nodes(self, node_id)
                                 set_temperature_success = True
-
-                if len(HSC.products.trv) > 0:
+                if len(HSC.products.trv) > 0 and set_temperature_success == False:
                     for current_node_index in range(0, len(HSC.products.trv)):
                         if "id" in HSC.products.trv[current_node_index]:
                             if HSC.products.trv[current_node_index]["id"] == node_id:
@@ -1475,7 +1516,6 @@ class Pyhiveapi:
                             if str(api_resp) == "<Response [200]>":
                                 Pyhiveapi.hive_api_get_nodes(self, node_id)
                                 set_temperature_success = True
-
             return set_temperature_success
 
         def set_mode(self, node_id, new_mode):
@@ -1513,7 +1553,6 @@ class Pyhiveapi:
                                 if str(api_resp) == "<Response [200]>":
                                     Pyhiveapi.hive_api_get_nodes(self, node_id)
                                     set_mode_success = True
-
                 if len(HSC.products.trv) > 0:
                     for current_node_index in range(0, len(HSC.products.trv)):
                         if "id" in HSC.products.trv[current_node_index]:
@@ -2931,3 +2970,5 @@ class Pyhiveapi:
                                      " is : " + str(battery_level_return) + "%")
                 else:
                     Pyhiveapi.logger("Device does not have battery info : " + node_id)
+            return battery_level_return
+        
