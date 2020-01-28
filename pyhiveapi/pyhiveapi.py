@@ -1598,6 +1598,14 @@ class Pyhiveapi:
             for a_heating in HSC.products.heating:
                 if "id" in a_heating:
                     if a_heating["id"] == node_id:
+                        node_type = "heating"
+                        heating_node_found = True
+                        break
+
+            for a_trv in HSC.products.trv:
+                if "id" in a_heating:
+                    if a_trv["id"] == node_id:
+                        node_type = "trvcontrol"
                         heating_node_found = True
                         break
 
@@ -1605,7 +1613,7 @@ class Pyhiveapi:
 
             if heating_node_found:
                 json_string_content = '{"mode": "BOOST", "boost": ' + str(length_minutes) + ', "target": ' + str(target_temperature) + '}'
-                hive_api_url = (HIVE_API.urls.nodes + "/heating/" + node_id)
+                hive_api_url = (HIVE_API.urls.nodes + "/" + node_type + "/" + node_id)
                 api_resp_d = Pyhiveapi.hive_api_json_call(self, "POST", hive_api_url, json_string_content, False)
 
                 api_resp = api_resp_d['original']
@@ -1626,6 +1634,14 @@ class Pyhiveapi:
             for a_heating in HSC.products.heating:
                 if "id" in a_heating:
                     if a_heating["id"] == node_id:
+                        node_type = "heating"
+                        heating_node_found = True
+                        break
+
+            for a_trv in HSC.products.trv:
+                if "id" in a_heating:
+                    if a_trv["id"] == node_id:
+                        node_type = "trvcontrol"
                         heating_node_found = True
                         break
 
@@ -1654,7 +1670,7 @@ class Pyhiveapi:
                             send_previous_temperature = ', "target": ' + str(previous_temperature)
 
                         json_string_content = '{' + send_previous_mode + send_previous_temperature + '}'
-                        hive_api_url = (HIVE_API.urls.nodes + "/heating/" + node_id)
+                        hive_api_url = (HIVE_API.urls.nodes + "/" + node_type + "/" + node_id)
                         api_resp_d = Pyhiveapi.hive_api_json_call(self, "POST", hive_api_url, json_string_content, False)
 
                         api_resp = api_resp_d['original']
