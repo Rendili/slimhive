@@ -1309,6 +1309,15 @@ class Pyhiveapi:
                     if ("state" in HSC.products.trv[node_index] and
                             "mode" in HSC.products.trv[node_index]["state"]):
                         mode_tmp = HSC.products.trv[node_index]["state"]["mode"]
+                        if mode_tmp == "BOOST":
+                            if ("props" in HSC.products.trv[node_index] and
+                                    "previous" in
+                                    HSC.products.trv[node_index]["props"] and
+                                    "mode" in
+                                    HSC.products.trv[node_index]
+                                    ["props"]["previous"]):
+                                mode_tmp = (HSC.products.trv[node_index]
+                                            ["props"]["previous"]["mode"])
                         mode_found = True
             if mode_found:
                 NODE_ATTRIBS[current_node_attribute] = mode_tmp
